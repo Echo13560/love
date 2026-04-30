@@ -279,15 +279,112 @@
         .back-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
         .back-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .back-btn:disabled:hover { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
+        /* Toast提示 */
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: var(--gradient-1); padding: 12px 24px; border-radius: 25px;
+            font-size: 0.9rem; font-weight: 500; z-index: 1001;
+            animation: toastIn 0.3s ease-out; opacity: 0;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        /* 历史记录按钮 */
+        .history-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 1000;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; font-size: 18px;
+        }
+        .history-btn:hover {
+            background: rgba(255, 255, 255, 0.2); transform: scale(1.1);
+        }
+        /* 历史记录面板 */
+        .history-panel {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
+            z-index: 200; display: none; overflow-y: auto;
+        }
+        .history-panel.active { display: block; }
+        .history-content {
+            max-width: 500px; margin: 0 auto; padding: 30px 20px;
+        }
+        .history-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px;
+        }
+        .history-title { font-size: 1.5rem; font-weight: 700; }
+        .history-close {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); border: none;
+            color: white; font-size: 1.2rem; cursor: pointer;
+        }
+        .history-back {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white; padding: 10px 20px; border-radius: 20px;
+            font-family: inherit; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;
+        }
+        .history-back:hover { background: rgba(255, 255, 255, 0.2); }
+        .history-list { display: flex; flex-direction: column; gap: 15px; }
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; padding: 20px; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .history-item:hover {
+            background: rgba(255, 107, 157, 0.1);
+            border-color: var(--accent-pink);
+        }
+        .history-item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .history-item-type { font-size: 1.3rem; font-weight: 700; }
+        .history-item-delete { 
+            background: none; border: none; color: rgba(255,255,255,0.4);
+            cursor: pointer; font-size: 1rem; padding: 5px;
+        }
+        .history-item-delete:hover { color: var(--accent-pink); }
+        .history-item-name { font-size: 1rem; color: var(--text-secondary); margin: 5px 0; }
+        .history-item-date { font-size: 0.8rem; color: rgba(255, 255, 255, 0.4); }
+        .history-empty {
+            text-align: center; padding: 60px 0;
+            color: var(--text-secondary);
+        }
+        .history-empty-icon { font-size: 3rem; margin-bottom: 15px; }
+        /* 分享操作按钮 */
+        .share-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .share-action-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15); color: white;
+            padding: 14px 20px; font-family: inherit; font-size: 0.9rem;
+            font-weight: 500; border-radius: 12px; cursor: pointer;
+            transition: all 0.3s ease; display: flex;
+            align-items: center; justify-content: center; gap: 8px;
+        }
+        .share-action-btn:hover {
+            background: rgba(255, 255, 255, 0.15); transform: translateY(-2px);
+        }
+        .share-action-btn.copy { background: rgba(107, 255, 255, 0.1); border-color: var(--accent-blue); }
+        .share-action-btn.wechat { background: rgba(7, 193, 96, 0.1); border-color: #07c160; }
+        .share-action-btn.link { background: rgba(255, 107, 157, 0.1); border-color: var(--accent-pink); }
     </style>
 </head>
 <body>
-    <!-- 背景音乐 -->
-    <audio id="bgMusic" loop>
-        <source src="https://cdn.pixabay.com/audio/2022/10/18/audio_53d9d6e4a9.mp3" type="audio/mpeg">
-        <source src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" type="audio/mpeg">
+    <!-- 背景音乐 - 使用多个备选源 -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
     </audio>
     <button class="music-control" id="musicBtn" title="播放背景音乐">🎵</button>
+    <!-- 历史记录按钮 -->
+    <button class="history-btn" id="historyBtn" title="历史记录" onclick="openHistory()">📋</button>
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
     
     <div class="bg-animation">
         <div class="floating-shape shape-1"></div>
@@ -323,7 +420,7 @@
             <div class="progress-section">
                 <div class="progress-top">
                     <span class="progress-label">💫 第 <span id="qNum">一</span> 题</span>
-                    <span class="progress-count"><span id="qNow">1</span> / 12</span>
+                    <span class="progress-count"><span id="qNow">1</span> / 16</span>
                 </div>
                 <div class="progress-track">
                     <div class="progress-fill" id="progFill"></div>
@@ -376,7 +473,38 @@
         <div class="modal-box">
             <div class="modal-title">🎭 分享你的恋爱人格</div>
             <div class="share-box" id="shareBox"></div>
-            <button class="modal-close" onclick="closeModal()">关闭</button>
+            <div class="share-actions" id="shareActions">
+                <button class="share-action-btn copy" onclick="copyShareText()">📋 复制文案</button>
+                <button class="share-action-btn link" onclick="generateShareLink()">🔗 生成分享链接</button>
+                <button class="share-action-btn wechat" onclick="showWechatTip()">💚 微信分享提示</button>
+            </div>
+            <button class="modal-close" onclick="closeModal()" style="margin-top: 15px;">关闭</button>
+        </div>
+    </div>
+
+    <!-- 历史记录面板 -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-content">
+            <div class="history-header">
+                <h2 class="history-title">📋 测试记录</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="history-back" onclick="backToHome()">🏠 返回首页</button>
+                    <button class="history-close" onclick="closeHistory()">✕</button>
+                </div>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- 链接弹窗 -->
+    <div class="modal-overlay" id="linkModal">
+        <div class="modal-box">
+            <div class="modal-title">🔗 分享链接</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">
+                复制下方链接，好友打开即可查看你的结果
+            </p>
+            <div class="share-box" id="linkBox" style="cursor: pointer;" onclick="copyLink()"></div>
+            <button class="modal-close" onclick="closeLinkModal()" style="margin-top: 15px;">关闭</button>
         </div>
     </div>
 
@@ -386,19 +514,41 @@
         const musicBtn = document.getElementById('musicBtn');
         let isPlaying = false;
 
-        musicBtn.addEventListener('click', function() {
+        // 尝试自动播放（用户首次交互后）
+        function tryAutoPlay() {
+            if (!isPlaying) {
+                bgMusic.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.textContent = '🔊';
+                    musicBtn.classList.add('playing');
+                }).catch(() => {
+                    // 自动播放被阻止，等待用户点击
+                });
+            }
+        }
+
+        // 首次点击页面时尝试播放
+        document.addEventListener('click', tryAutoPlay, { once: true });
+
+        musicBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
             if (isPlaying) {
                 bgMusic.pause();
                 musicBtn.textContent = '🎵';
                 musicBtn.classList.remove('playing');
             } else {
-                bgMusic.play().catch(() => {
-                    // 自动播放被阻止时静默处理
-                });
-                musicBtn.textContent = '🎵';
+                bgMusic.play().catch(() => {});
+                musicBtn.textContent = '🔊';
                 musicBtn.classList.add('playing');
             }
             isPlaying = !isPlaying;
+        });
+
+        // 音乐播放结束切换到下一首
+        bgMusic.addEventListener('ended', function() {
+            // 重新播放实现循环效果
+            bgMusic.currentTime = 0;
+            bgMusic.play().catch(() => {});
         });
 
         // 16种爱情人格（SBTI风格旧名称）
@@ -517,126 +667,166 @@
             }
         };
 
-        // 测试问题（12道，有趣味性、长选项）
+        // 测试问题（16道，精确区分16种恋爱类型，包容多元恋爱）
         const questions = [
             {
-                context: '「夜深忽梦少年事」',
-                q: '凌晨两点，你躺在被窝里翻来覆去睡不着，这时候手机突然亮了——是你曾经很喜欢的那个人发来一条消息："睡了吗？我好像梦到你了。" 你会？',
+                context: '「情不知所起」',
+                q: '深夜刷到一条朋友圈，对方是你暗恋过的人，发了和新对象的合照，配文"终于等到你"。你会？',
                 opts: [
-                    { text: '心跳骤然加速，立刻坐起来反复看这句话的含义，然后开始回想起过去的点点滴滴，整个人都清醒了再也睡不着，脑子里已经把复合后的场景演了一遍', icon: '💓', scores: {LV:2, AN:1, XI:1} },
-                    { text: '假装没看到，把手机扣过去，假装自己已经睡了。但其实内心已经翻江倒海，在被窝里偷偷笑，然后又偷偷哭', icon: '😶', scores: {GB:2, HB:1} },
-                    { text: '直接回复："做梦梦到我？那你是想我了还是在骂我？"——毕竟深夜消息，不一定是惊喜也可能是惊吓，先试探一下再说', icon: '🤔', scores: {ZQ:2, XN:1} },
-                    { text: '截图发给闺蜜群，三个人一起分析到凌晨四点，非要搞清楚对方到底是什么意思，附带讨论如果复合了要怎么办', icon: '👯', scores: {JJ:1, XX:1} }
+                    { text: '点赞必须点！还要留言"祝福祝福"，内心毫无波澜（真的吗？），刷三遍确认自己真的不在意', icon: '👍', scores: {ST:2, GB:1} },
+                    { text: '默默把这条朋友圈截图保存，然后刷到凌晨三点，反复分析"终于等到你"是什么意思，他们认识多久了', icon: '📱', scores: {AN:2, XX:1} },
+                    { text: '假装没看到，但已经开始脑补各种可能性：是在说我吗？还是新欢？难道还有复合的可能？', icon: '🤔', scores: {GB:2, AN:1} },
+                    { text: '果断滑走，然后默默关掉朋友圈入口。过去的就让它过去，向前看才是正道', icon: '💪', scores: {DL:2, ZX:1} }
                 ]
             },
             {
-                context: '「人间烟火气，最抚凡人心」',
-                q: '周末到了，你理想中和喜欢的人一起度过的方式是？',
+                context: '「心动时刻」',
+                q: '你和crush第一次单独约会，对方主动帮你夹菜、倒水，还记住了你上次随口说的喜好。这说明什么？',
                 opts: [
-                    { text: '一起去逛菜市场，然后回家研究怎么把那些食材变成一桌好吃的。吃饭的时候聊天、追剧、或者就安静地待着，这样就很好', icon: '🛒', scores: {NK:2, LV:1} },
-                    { text: '去听一场live house或者看一场展，然后找个咖啡店坐下来聊聊刚才的感受，觉得精神上的共鸣比什么都重要', icon: '🎵', scores: {ZX:2, AN:1} },
-                    { text: '宅在家里一起打游戏、点外卖、躺在床上刷手机，有时候什么都不做，只是待在一起就觉得很安心', icon: '🎮', scores: {DL:2, GB:1} },
-                    { text: '计划一次说走就走的短途旅行，去海边看日落或者去山里看星星，生活需要仪式感，恋爱更需要惊喜', icon: '✈️', scores: {GJ:2, ZQ:1} }
+                    { text: 'TA一定对我有意思！这些细节说明TA一直在关注我，我要不要也主动一点？', icon: '💓', scores: {LV:2, NK:1} },
+                    { text: '可能是礼貌吧，别想太多。不过...TA确实挺细心的，和TA相处很舒服', icon: '😌', scores: {GB:2, ST:1} },
+                    { text: '等等，TA记得我说的话？这种灵魂共鸣的感觉太棒了，智商高的人果然不一样', icon: '🧠', scores: {ZX:2, XX:1} },
+                    { text: '记性这么好的人真的存在吗？还是TA在刻意讨好我？我得观察观察', icon: '🔍', scores: {XX:2, AN:1} }
                 ]
             },
             {
-                context: '「情不知所起，一往而深」',
-                q: '你相信自己会是哪种一见钟情的类型？',
+                context: '「冷战攻防」',
+                q: '你和对象吵架了，气头上说了句"算了，分手吧"。说完之后你其实后悔了，但面子上拉不下来。这时候你会？',
                 opts: [
-                    { text: '相信！人群中多看了一眼，整个人生都亮了。喜欢就是喜欢，不需要理由，不需要铺垫，心动就是一瞬间的事', icon: '⚡', scores: {LV:2, ZQ:1} },
-                    { text: '不相信，我觉得日久生情才是靠谱的。那些所谓的一见钟情不过是见色起意，真正的感情需要时间来验证', icon: '🧊', scores: {GB:2, XX:1} },
-                    { text: '我更相信那种说不清的缘分，有时候你以为自己不会心动，但遇到对的人，一切都刚刚好', icon: '🎲', scores: {ST:2, AN:1} },
-                    { text: '一见钟情只是开始，能不能走下去还得看后续。喜欢是本能，相处才是能力', icon: '🧠', scores: {ZX:2, DL:1} }
+                    { text: '删掉那条消息，当作没说过。然后找个别的理由发消息，比如问问TA吃了晚饭没', icon: '😅', scores: {HB:2, XX:1} },
+                    { text: '等着TA来哄我。TA如果真的在乎我，就应该主动来找我，不然这段感情不要也罢', icon: '😤', scores: {GB:2, AN:1} },
+                    { text: '主动找TA和好，但嘴上绝不认输：我是为了世界和平才来找你的，别误会', icon: '💢', scores: {HB:2, LV:1} },
+                    { text: '冷静分析刚才的争吵，我确实有说得过分的地方。发消息说：刚才是气话，但我们确实需要谈谈', icon: '💬', scores: {ZQ:2, ZX:1} }
                 ]
             },
             {
-                context: '「山有木兮木有枝，心悦君兮君不知」',
-                q: '你暗恋一个人的时候，最典型的小动作是什么？',
+                context: '「恋爱节奏」',
+                q: '朋友给你介绍了一个条件不错的人，你们加了微信。一般情况下，你会？',
                 opts: [
-                    { text: '翻看对方的朋友圈和微博，从头看到尾，把每一条动态都研究一遍，恨不得能从字里行间读出什么隐藏含义', icon: '📱', scores: {XX:2, AN:1} },
-                    { text: '在人群中总是下意识地寻找对方的身影，听到对方名字会竖起耳朵，但表面上装作若无其事，假装自己根本不在乎', icon: '👀', scores: {GB:2, HB:1} },
-                    { text: '频繁地"偶遇"对方，去对方常去的咖啡店、图书馆，就为了多看几眼。这种小心思只有自己知道，但其实大家都知道', icon: '☕', scores: {LV:2, FC:1} },
-                    { text: '默默地对对方好，但不让任何人看出来。把喜欢藏在心底，哪怕对方永远不知道也没关系，爱过就不后悔', icon: '🌙', scores: {FC:2, GB:1} }
+                    { text: '第一天就开始聊天，不聊到凌晨两点不算完。恨不得三天内确定关系', icon: '⚡', scores: {LV:2, ZQ:1} },
+                    { text: '慢慢来，每天聊几句就好。不着急，先当朋友处着，让感情自然发展', icon: '🐢', scores: {GB:2, XX:1} },
+                    { text: '先了解一下对方的基本情况、三观、喜好，觉得OK再投入感情。快餐式恋爱不适合我', icon: '📋', scores: {ZX:2, DL:1} },
+                    { text: '把情况告诉闺蜜/基友，让他们先帮我把把关。朋友说好才是真的好，我自己看不准', icon: '👯', scores: {XX:2, FC:1} }
                 ]
             },
             {
-                context: '「若教眼底无离恨，不信人间有白头」',
-                q: '你身边有一个从学生时代就在一起、陪伴了你很多年的恋人，现在异地恋中，对方工作很忙联系越来越少，你会怎么做？',
+                context: '「占有欲测试」',
+                q: '你发现对象和朋友单独吃了顿饭，还是在你不知情的情况下。你的反应是？',
                 opts: [
-                    { text: '主动表达自己的不安，告诉他你需要更多的联系和关心。爱情需要沟通，憋着不说只会越来越难受', icon: '💬', scores: {LV:2, FC:1} },
-                    { text: '理解对方的工作压力，默默做好自己的事情，等待一个合适的时机再好好谈谈。给彼此一些空间和信任', icon: '🤝', scores: {GB:2, ST:1} },
-                    { text: '开始怀疑这段感情是否还有必要坚持下去，如果连基本的陪伴都给不了，那恋爱的意义是什么', icon: '❓', scores: {AN:2, HB:1} },
-                    { text: '虽然很想念，但不想做一个无理取闹的人。自己去逛逛街、和朋友吃吃饭，把生活安排得充实一点', icon: '🌸', scores: {ST:2, XX:1} }
+                    { text: '装作若无其事，但开始偷偷查那个人的社交账号，恨不得查出他们的关系图谱', icon: '🔍', scores: {XX:2, AN:1} },
+                    { text: '直接问清楚：你和谁吃饭了？为什么不叫我？有什么事是我不能知道的吗？', icon: '⚡', scores: {ZQ:2, HB:1} },
+                    { text: '不就是吃个饭吗，谁还没有自己的朋友。反而是我这样疑神疑鬼才显得不信任对方', icon: '😌', scores: {ST:2, DL:1} },
+                    { text: '心里有点不舒服，但不想表现出来。先观察一段时间，看看还有没有类似的情况', icon: '🤔', scores: {GB:2, AN:1} }
                 ]
             },
             {
-                context: '「人生若只如初见」',
-                q: '你最喜欢恋爱的哪个阶段？',
+                context: '「仪式感」',
+                q: '在一起一周年了，你最希望收到什么礼物？',
                 opts: [
-                    { text: '暧昧期！那种心跳加速、患得患失、每天都在猜对方心思的感觉，简直让人欲罢不能，比正式在一起了还有意思', icon: '🎭', scores: {LV:2, AN:1} },
-                    { text: '热恋期！恨不得24小时贴在一起，做什么都想带上对方，觉得对方天下第一好，世界都变得美好了', icon: '🔥', scores: {NK:2, LV:1} },
-                    { text: '老夫老妻期！经历了热恋的激情之后还能相濡以沫，那种默契和安心感才是最难得的', icon: '🏡', scores: {ST:2, GB:1} },
-                    { text: '没有最喜欢的阶段，每个阶段都有每个阶段的美好。重要的是和谁一起经历，和对的人在一起每天都是好日子', icon: '☯️', scores: {DL:2, GJ:1} }
+                    { text: '一个用心的礼物！哪怕是一封手写信都比现金红包强，因为代表TA真的在想我', icon: '💌', scores: {XX:2, LV:1} },
+                    { text: '一场说走就走的旅行！比起礼物，我更想要两个人的专属回忆', icon: '✈️', scores: {GJ:2, LV:1} },
+                    { text: '限量版手办/游戏皮肤/专业书籍等，反正得是我真正喜欢的东西，而不是敷衍了事', icon: '🎮', scores: {ZX:2, DL:1} },
+                    { text: '礼物无所谓，重要的是一起吃顿好的，然后拍一组情侣照发朋友圈', icon: '📸', scores: {NK:2, GJ:1} }
                 ]
             },
             {
-                context: '「你站在桥上看风景」',
-                q: '你照镜子的时候，觉得自己是什么样的人？',
+                context: '「前任阴影」',
+                q: '前任突然给你发消息："最近还好吗？" 你会怎么回复？',
                 opts: [
-                    { text: '一个很会照顾别人的人，朋友有事第一个想到我。但有时候也会累，想让别人照顾一下自己', icon: '🤗', scores: {FC:2, LV:1} },
-                    { text: '一个很独立的人，不需要别人也能过得很好。偶尔会觉得有点孤单，但这才是酷酷的人生', icon: '🦊', scores: {DL:2, GB:1} },
-                    { text: '一个外表冷冷的但内心很柔软的人，熟悉我的人都知道我其实很感性，只是不太会表达', icon: '🪨', scores: {HB:2, GB:1} },
-                    { text: '一个一直在等待的人，等那个对的人出现。在那之前，我选择好好爱自己', icon: '🌟', scores: {ZX:2, AN:1} }
+                    { text: '秒回！立刻打开对话框，但打字打了删删了打，最后发出去的是一个友好的微笑表情', icon: '😊', scores: {GB:2, LV:1} },
+                    { text: '截图发闺蜜/基友群：救命TA要干嘛！！分析了一晚上决定晾TA一天再回，显得我很忙', icon: '👯', scores: {AN:2, XX:1} },
+                    { text: '不回。有些人不打扰才是最好的温柔，过去就让它过去吧', icon: '🍃', scores: {ST:2, GB:1} },
+                    { text: '直接问：你有事吗？没事就别聊了，我很忙的', icon: '😑', scores: {ZQ:2, GB:1} }
                 ]
             },
             {
-                context: '「两情若是久长时，又岂在朝朝暮暮」',
-                q: '你觉得自己在感情中最需要的是什么？',
+                context: '「恋爱日常」',
+                q: '周末你有自己的安排（健身/学习/和朋友聚会），但对象突然说想见你，你会？',
                 opts: [
-                    { text: '安全感。我需要一个能让我完全信任、可以放下所有防备的人，不用担心被抛弃或者被背叛', icon: '🛡️', scores: {XX:2, LV:1} },
-                    { text: '新鲜感。我需要源源不断的惊喜和心动，如果生活变得太无聊，我可能会忍不住去外面寻找刺激', icon: '🎢', scores: {HB:2, GJ:1} },
-                    { text: '理解。懂比爱更重要，我希望有人能理解我的想法、我的追求、我的小情绪，而不是只关心表面的东西', icon: '💭', scores: {ZX:2, XX:1} },
-                    { text: '自由。我需要一定的个人空间，不喜欢被束缚、被控制、被查岗。健康的恋爱应该是两个独立的人互相陪伴', icon: '🪶', scores: {GB:2, ST:1} }
+                    { text: '当然是推掉自己的计划去见TA！和TA在一起比什么都重要，计划随时可以改', icon: '💕', scores: {NK:2, LV:1} },
+                    { text: '我可以早起一个小时陪TA，然后再去忙我的事情，两边都不耽误', icon: '⏰', scores: {FC:2, LV:1} },
+                    { text: '和TA商量一下，能不能调整一下时间？如果真的很重要我可以配合，但我的计划也很重要', icon: '🤝', scores: {GB:2, ZX:1} },
+                    { text: '周末本来就是我自己的时间，恋爱归恋爱，我也有自己的生活和社交圈', icon: '🏋️', scores: {DL:2, ZX:1} }
                 ]
             },
             {
-                context: '「愿得一心人，白首不相离」',
-                q: '如果你的好朋友告诉你，他/她好像喜欢上同性的同事了，你会怎么回应？',
+                context: '「理想型」',
+                q: '你心里完美的另一半是什么样的？',
                 opts: [
-                    { text: '这不是理所当然的吗？喜欢就是喜欢，和性别有什么关系。支持你朋友的勇敢，希望他/她幸福', icon: '🏳️‍🌈', scores: {ST:2, DL:1} },
-                    { text: '先确认朋友是不是真的想清楚了，不管是什么性向的感情，重要的是双方真心相爱', icon: '💕', scores: {XX:2, LV:1} },
-                    { text: '（若有所思）其实你自己也...（小声）从来没认真想过这个问题，直到现在才发现，原来我也是可以喜欢异性的', icon: '🤷', scores: {AN:2, GB:1} },
-                    { text: '八卦地追问细节！喜欢的人是谁？怎么发现的？要不要我帮你出主意？朋友的事就是我的事', icon: '👂', scores: {GJ:2, XX:1} }
+                    { text: '好看是第一位的，看着赏心悦目才能有继续了解的动力', icon: '😍', scores: {NK:2, LV:1} },
+                    { text: '一定要聪明！学历高、见识广、聊什么都接得住，颜值可以一般但脑子必须在线', icon: '🧠', scores: {ZX:2, XX:1} },
+                    { text: '没有具体标准，遇到对的人就知道了。理想型不是模板，而是那个让你心动的人', icon: '✨', scores: {ST:2, AN:1} },
+                    { text: '专一、会照顾人、能给我安全感就行。太花哨的人我不放心，平平淡淡才是真', icon: '🏠', scores: {XX:2, GB:1} }
                 ]
             },
             {
-                context: '「等闲变却故人心，却道故人心易变」',
-                q: '你约会时对方迟到了半小时，你会？',
+                context: '「社交媒体」',
+                q: '热恋期的你，会在朋友圈怎么发关于对象的内容？',
                 opts: [
-                    { text: '表面平静，内心已经演完一部剧：从"他是不是不喜欢我了"演到"他是不是出车祸了"再演到"我是不是太敏感了"', icon: '🎬', scores: {AN:2, XX:1} },
-                    { text: '无所谓，反正我也在刷手机等他。迟到就迟到呗，我自己玩得也挺开心的', icon: '😌', scores: {ST:2, GB:1} },
-                    { text: '直接问：怎么迟到了？是不是有什么事？直接沟通比胡思乱想要高效得多', icon: '⚡', scores: {ZQ:2, LV:1} },
-                    { text: '假装没迟到，帮他找借口：堵车很正常嘛没关系没关系——但其实已经在心里扣分了', icon: '🥺', scores: {HB:2, XX:1} }
+                    { text: '必须官宣！精修九宫格，配上肉麻文案，让所有人知道我脱单了', icon: '📸', scores: {NK:2, LV:1} },
+                    { text: '偶尔发个背影或者影子照，不露脸但懂的都懂，低调地秀恩爱', icon: '👤', scores: {GB:2, AN:1} },
+                    { text: '发什么发，恋爱是两个人的事，为什么要表演给外人看？', icon: '😐', scores: {DL:2, GB:1} },
+                    { text: '把聊天记录截图做成表情包发出去，搞笑又不失甜蜜，这才是我的风格', icon: '🤪', scores: {GJ:2, NK:1} }
                 ]
             },
             {
-                context: '「执子之手，与子偕老」',
-                q: '用一句诗或歌词形容你的爱情观',
+                context: '「分手之后」',
+                q: '这段感情结束后，你花了多久走出阴影？',
                 opts: [
-                    { text: '"从前的日色变得慢，车、马、邮件都慢，一生只够爱一个人。" ——我向往那种一生一世一双人的爱情', icon: '🐢', scores: {XX:2, ST:1} },
-                    { text: '"愿你历尽千帆，归来仍是少年。" ——我希望我们的爱情能保持最初的心动，不管在一起多久，依然像第一天那样', icon: '🌸', scores: {ZQ:2, LV:1} },
-                    { text: '"我们相爱一生，还是太短。" ——我觉得好的爱情就是这样，让人想要一直爱下去，永远不分开', icon: '💫', scores: {LV:2, NK:1} },
-                    { text: '"你记得也好，最好你忘掉。" ——有些人注定是过客，爱过就够了，不必强求结果，学会放下也是一种能力', icon: '🍃', scores: {GB:2, ST:1} }
+                    { text: '三年起步。不是我走不出来，是这段感情太刻骨铭心，需要时间慢慢治愈', icon: '💔', scores: {LV:2, AN:1} },
+                    { text: '一两周吧。难受归难受，但生活还要继续，没有谁离不开谁', icon: '😌', scores: {ST:2, DL:1} },
+                    { text: '刚分手那几天确实难熬，但我很快就调整过来了。毕竟是为了遇到对的人嘛', icon: '🌱', scores: {GB:2, ZX:1} },
+                    { text: '分手第一天就开始复盘：这段感情教会了我什么？我下次要怎么做得更好？', icon: '📝', scores: {ZX:2, FC:1} }
                 ]
             },
             {
-                context: '「曾经沧海难为水」',
-                q: '你手机相册里最多的照片是什么类型的？',
+                context: '「暧昧期」',
+                q: '你们处于暧昧期，对话框里全是甜蜜的试探和小心翼翼的撩拨。你最享受的是什么？',
                 opts: [
-                    { text: '自拍和他/她的合照，每一张都要精修然后发朋友圈，恨不得全世界都知道我们很幸福', icon: '📸', scores: {LV:2, NK:1} },
-                    { text: '风景、美食、猫咪，反正不是人。拍人的照片少得可怜，自己出镜更是几乎没有', icon: '🐱', scores: {DL:2, GB:1} },
-                    { text: '聊天记录截图、表情包合集，还有一些只有自己能看懂的"证据"——这些都是珍贵的回忆', icon: '📁', scores: {XX:2, AN:1} },
-                    { text: '各种表情包和搞笑图片，我手机里存的全是沙雕内容，恋爱？不存在的，只有快乐', icon: '🤪', scores: {GJ:2, HB:1} }
+                    { text: '对方突然发来的一句"想你了"，哪怕只有三个字，我能傻笑一整天', icon: '💓', scores: {LV:2, AN:1} },
+                    { text: '那种猜来猜去的感觉！你不知道TA喜不喜欢你，TA也在试探你，这种拉扯太上头了', icon: '🎭', scores: {AN:2, HB:1} },
+                    { text: '每次见面TA都能记住我说过的小事，然后不经意间提起，那种被重视的感觉', icon: '💎', scores: {XX:2, ZX:1} },
+                    { text: '可以光明正大地和别人聊天，反正还没确定关系，我还有选择的权利', icon: '😏', scores: {HB:2, GJ:1} }
+                ]
+            },
+            {
+                context: '「安全感来源」',
+                q: '在恋爱中，什么最能让你感到安心？',
+                opts: [
+                    { text: '手机随便看、行程随时报备、TA主动给的安全感。透明的关系让我放心', icon: '🔐', scores: {NK:2, XX:1} },
+                    { text: '吵架之后TA会主动来哄我，即使是我的错也会先道歉，让我知道无论怎样TA都不会离开', icon: '🤗', scores: {GB:2, LV:1} },
+                    { text: '有各自的空间和社交圈，不过分依赖对方，这种健康的关系才让我踏实', icon: '🤝', scores: {DL:2, GB:1} },
+                    { text: 'TA能接住我的所有情绪，在我崩溃的时候不会嫌弃我笨拙，这样的包容让我安心', icon: '💪', scores: {FC:2, ZX:1} }
+                ]
+            },
+            {
+                context: '「付出观」',
+                q: '你为这段感情投入了很多（时间、金钱、精力），但对方似乎没有同等的回应。你会？',
+                opts: [
+                    { text: '没关系，我愿意付出是因为我爱你，不图回报。而且我相信TA迟早会懂的', icon: '🥰', scores: {FC:2, LV:1} },
+                    { text: '主动沟通，问问TA的想法。感情需要平衡，单方面的付出确实不健康', icon: '💬', scores: {ZQ:2, XX:1} },
+                    { text: '收回一部分投入，开始更爱自己。我可以对你好，但你得值得', icon: '💪', scores: {ST:2, ZX:1} },
+                    { text: '算了，投入得越多越难以割舍。及时止损，重新评估这段关系是否值得继续', icon: '📊', scores: {ZX:2, DL:1} }
+                ]
+            },
+            {
+                context: '「恋爱中的你」',
+                q: '如果用一个词形容恋爱中的你，你会选择？',
+                opts: [
+                    { text: '粘人精。恋爱就是要贴贴、报备、确认行程，少一样都感觉不对劲', icon: '🧸', scores: {NK:2, XX:1} },
+                    { text: '福尔摩斯。任何蛛丝马迹都逃不过我的眼睛，一句话我能分析出八百种含义', icon: '🔍', scores: {XX:2, AN:1} },
+                    { text: '小太阳。恋爱让我发光发热，我要用快乐感染对方，把日子过得有趣', icon: '☀️', scores: {GJ:2, LV:1} },
+                    { text: '辩论选手。恋爱就是要讨论、争论、在碰撞中磨合，真理越辩越明', icon: '⚖️', scores: {ZQ:2, ZX:1} }
+                ]
+            },
+            {
+                context: '「灵魂拷问」',
+                q: '你觉得恋爱中最重要的是什么？',
+                opts: [
+                    { text: '专一。一旦确定关系就全身心投入，不给别人留余地，也不给自己留退路', icon: '💍', scores: {LV:2, XX:1} },
+                    { text: '新鲜感。再甜的恋爱也会腻，需要不断制造惊喜和浪漫，让感情保持活力', icon: '🎢', scores: {HB:2, GJ:1} },
+                    { text: '契合。三观一致、兴趣相投、能聊到一起，这样的关系才能长久', icon: '🎯', scores: {ZX:2, GB:1} },
+                    { text: '沟通。有话直说，不藏着掖着，有矛盾就摊开来讲清楚', icon: '💬', scores: {ZQ:2, FC:1} }
                 ]
             }
         ];
@@ -644,7 +834,7 @@
         // 测试逻辑
         let curQ = 0;
         let scores = {LV:0, HB:0, GB:0, ZQ:0, AN:0, XX:0, NK:0, ST:0, GJ:0, FC:0, DL:0, ZX:0, XI:0, XN:0, ZZ:0};
-        const chineseNum = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+        const chineseNum = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六'];
         let answerHistory = [];
 
         function showScreen(id) {
@@ -705,31 +895,44 @@
         }
 
         function calcType() {
-            const scoreList = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-            const top1 = scoreList[0][0];
-            const typeMap = {
-                'LV': ['LV01', 'LV08', 'LV13'],
-                'HB': ['LV04', 'LV09', 'LV16'],
-                'GB': ['LV03', 'LV07', 'LV14'],
-                'ZQ': ['LV04', 'LV10', 'LV16'],
-                'AN': ['LV05', 'LV11', 'LV15'],
-                'XX': ['LV01', 'LV06', 'LV12'],
-                'NK': ['LV08', 'LV13', 'LV06'],
-                'ST': ['LV14', 'LV16', 'LV07'],
-                'GJ': ['LV16', 'LV04', 'LV14'],
-                'FC': ['LV13', 'LV09', 'LV03'],
-                'DL': ['LV07', 'LV10', 'LV14'],
-                'ZX': ['LV10', 'LV15', 'LV03'],
-                'XI': ['LV01', 'LV05', 'LV11'],
-                'XN': ['LV04', 'LV06', 'LV14'],
-                'ZZ': ['LV10', 'LV07', 'LV11']
+            // 计算各类型倾向得分
+            const typeScores = {
+                // 恋爱脑 LV01: LV高, NK中
+                'LV01': scores.LV + scores.NK * 0.5,
+                // 海王 LV02: HB高, GJ高
+                'LV02': scores.HB + scores.GJ,
+                // 冰山美人 LV03: GB高, ZX中
+                'LV03': scores.GB + scores.ZX * 0.3,
+                // 直球 LV04: ZQ高, GJ中
+                'LV04': scores.ZQ + scores.GJ * 0.3,
+                // 演技派 LV05: HB高, AN中
+                'LV05': scores.HB + scores.AN * 0.5,
+                // 慢热 LV06: XX高, GB中
+                'LV06': scores.XX + scores.GB * 0.4,
+                // 独立人格 LV07: DL高, GB中
+                'LV07': scores.DL + scores.GB * 0.3,
+                // 粘人精 LV08: NK高, XX中
+                'LV08': scores.NK + scores.XX * 0.5,
+                // 嘴硬心软 LV09: HB高, LV中
+                'LV09': scores.HB + scores.LV * 0.3,
+                // 智性恋 LV10: ZX高, ZQ中
+                'LV10': scores.ZX + scores.ZQ * 0.4,
+                // 细节控 LV11: XX高, AN中
+                'LV11': scores.XX + scores.AN * 0.5,
+                // 回避型 LV12: AN高, GB中
+                'LV12': scores.AN + scores.GB * 0.4,
+                // 付出型 LV13: FC高, NK中
+                'LV13': scores.FC + scores.NK * 0.3,
+                // 洒脱 LV14: ST高, DL中
+                'LV14': scores.ST + scores.DL * 0.4,
+                // 理想主义 LV15: ZX高, AN中
+                'LV15': scores.ZX + scores.AN * 0.4,
+                // 搞怪 LV16: GJ高, HB中
+                'LV16': scores.GJ + scores.HB * 0.3
             };
-            const possibleTypes = typeMap[top1] || ['LV01'];
-            const totalScore = scoreList.reduce((sum, item) => sum + item[1], 0);
-            const topScore = scoreList[0][1];
-            const ratio = topScore / (totalScore || 1);
-            let typeIndex = ratio > 0.35 ? 0 : ratio > 0.25 ? 1 : 2;
-            return possibleTypes[typeIndex % possibleTypes.length];
+
+            const sortedTypes = Object.entries(typeScores).sort((a, b) => b[1] - a[1]);
+            return sortedTypes[0][0];
         }
 
         function showResult() {
@@ -760,6 +963,9 @@
                 card.innerHTML = `<div class="dim-label">行为特征</div><div class="dim-value">${d}</div>`;
                 dimGrid.appendChild(card);
             });
+
+            // 自动保存结果
+            saveResult(type, p.name, p.title, '✨ 全球仅 ' + p.rarity + ' 的人', p.art, p.desc, p.traits, p.dims);
         }
 
         function retake() { startTest(); }
@@ -784,6 +990,216 @@ ${name}是什么体验？反正只有同款才懂 😏
         function closeModal() {
             document.getElementById('shareModal').classList.remove('active');
         }
+
+        // Toast提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 本地存储管理
+        const STORAGE_KEY = 'loveSBTI_results';
+        function getResults() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch { return []; }
+        }
+        function saveResult(type, name, title, rarity, art, desc, traits, dims) {
+            const results = getResults();
+            results.unshift({
+                id: Date.now(),
+                type, name, title, rarity, art, desc, traits, dims,
+                date: new Date().toLocaleString('zh-CN')
+            });
+            // 最多保存20条记录
+            if (results.length > 20) results.pop();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+        }
+
+        // 复制分享文案
+        function copyShareText() {
+            const text = document.getElementById('shareBox').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ 已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        // 生成分享链接
+        function generateShareLink() {
+            const type = document.getElementById('resType').textContent;
+            const name = document.getElementById('resName').textContent;
+            const title = document.getElementById('charTitle').textContent;
+            const rarity = document.getElementById('resRarity').textContent;
+            const art = document.getElementById('charArt').textContent;
+            
+            // 编码结果信息
+            const shareData = {
+                t: type,
+                n: name,
+                tt: title,
+                r: rarity,
+                a: art,
+                d: window.location.pathname
+            };
+            const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
+            const link = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
+            
+            document.getElementById('linkBox').textContent = link;
+            document.getElementById('linkModal').classList.add('active');
+        }
+
+        function copyLink() {
+            const link = document.getElementById('linkBox').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('✓ 链接已复制');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        function closeLinkModal() {
+            document.getElementById('linkModal').classList.remove('active');
+        }
+
+        // 微信分享提示
+        function showWechatTip() {
+            showToast('微信内点击右上角「···」→「复制链接」即可分享');
+        }
+
+        // 历史记录面板
+        function openHistory() {
+            const results = getResults();
+            const list = document.getElementById('historyList');
+            
+            if (results.length === 0) {
+                list.innerHTML = `
+                    <div class="history-empty">
+                        <div class="history-empty-icon">📋</div>
+                        <p>还没有测试记录</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">完成测试后会自动保存到这里</p>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = results.map(r => `
+                    <div class="history-item" onclick="loadHistory(${r.id})">
+                        <div class="history-item-header">
+                            <div class="history-item-type">${r.art} ${r.type}</div>
+                            <button class="history-item-delete" onclick="event.stopPropagation(); deleteHistory(${r.id})">🗑️</button>
+                        </div>
+                        <div class="history-item-name">${r.name}</div>
+                        <div class="history-item-date">${r.date}</div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('historyPanel').classList.add('active');
+        }
+
+        function closeHistory() {
+            document.getElementById('historyPanel').classList.remove('active');
+        }
+
+        function backToHome() {
+            closeHistory();
+            showScreen('landing');
+        }
+
+        function loadHistory(id) {
+            const results = getResults();
+            const result = results.find(r => r.id === id);
+            if (!result) return;
+            
+            // 恢复结果显示
+            document.getElementById('resType').textContent = result.type;
+            document.getElementById('resName').textContent = result.name;
+            document.getElementById('charTitle').textContent = result.title;
+            document.getElementById('resRarity').textContent = result.rarity;
+            document.getElementById('charArt').textContent = result.art;
+            document.getElementById('charDesc').textContent = result.desc;
+
+            const traitWrap = document.getElementById('traitWrap');
+            traitWrap.innerHTML = '';
+            result.traits.forEach(t => {
+                const tag = document.createElement('span');
+                tag.className = 'trait-tag';
+                tag.textContent = t;
+                traitWrap.appendChild(tag);
+            });
+
+            const dimGrid = document.getElementById('dimGrid');
+            dimGrid.innerHTML = '';
+            result.dims.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'dim-card';
+                card.innerHTML = `<div class="dim-label">行为特征</div><div class="dim-value">${d}</div>`;
+                dimGrid.appendChild(card);
+            });
+
+            closeHistory();
+            showScreen('result');
+            showToast('已加载历史记录');
+        }
+
+        function deleteHistory(id) {
+            const results = getResults().filter(r => r.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+            openHistory();
+            showToast('已删除记录');
+        }
+
+        // 检查URL是否有分享参数
+        function checkShareParam() {
+            const params = new URLSearchParams(window.location.search);
+            const s = params.get('s');
+            if (s) {
+                try {
+                    const shareData = JSON.parse(decodeURIComponent(atob(s)));
+                    if (shareData.t && shareData.n) {
+                        // 显示分享的结果
+                        document.getElementById('resType').textContent = shareData.t;
+                        document.getElementById('resName').textContent = shareData.n;
+                        document.getElementById('charTitle').textContent = shareData.tt || '';
+                        document.getElementById('resRarity').textContent = shareData.r || '';
+                        document.getElementById('charArt').textContent = shareData.a || '💕';
+                        
+                        // 获取完整数据
+                        const fullData = loveTypes[shareData.t];
+                        if (fullData) {
+                            document.getElementById('charDesc').textContent = fullData.desc;
+                            const traitWrap = document.getElementById('traitWrap');
+                            traitWrap.innerHTML = '';
+                            fullData.traits.forEach(t => {
+                                const tag = document.createElement('span');
+                                tag.className = 'trait-tag';
+                                tag.textContent = t;
+                                traitWrap.appendChild(tag);
+                            });
+                            const dimGrid = document.getElementById('dimGrid');
+                            dimGrid.innerHTML = '';
+                            fullData.dims.forEach(d => {
+                                const card = document.createElement('div');
+                                card.className = 'dim-card';
+                                card.innerHTML = `<div class="dim-label">行为特征</div><div class="dim-value">${d}</div>`;
+                                dimGrid.appendChild(card);
+                            });
+                        }
+                        showScreen('result');
+                        // 清理URL参数
+                        window.history.replaceState({}, '', window.location.pathname);
+                        showToast('👀 查看了好友的测试结果');
+                    }
+                } catch (e) {
+                    console.log('分享参数解析失败');
+                }
+            }
+        }
+
+        // 页面加载时检查分享参数
+        checkShareParam();
     </script>
 </body>
 </html>
