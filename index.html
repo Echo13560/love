@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋恋 SBTI · 爱情人格测试</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --accent-pink: #ff6b9d;
+            --accent-blue: #6bffff;
+            --accent-yellow: #ffff6b;
+            --accent-purple: #c56bff;
+            --gradient-1: linear-gradient(135deg, #ff6b9d 0%, #c56bff 100%);
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; pointer-events: none;
+        }
+        .floating-shape {
+            position: absolute; border-radius: 50%; filter: blur(60px);
+            opacity: 0.3; animation: floatShape 20s infinite ease-in-out;
+        }
+        .shape-1 { width: 400px; height: 400px; background: var(--accent-pink); top: -100px; left: -100px; }
+        .shape-2 { width: 300px; height: 300px; background: var(--accent-purple); bottom: -50px; right: -50px; animation-delay: -5s; }
+        .shape-3 { width: 200px; height: 200px; background: var(--accent-blue); top: 50%; right: 20%; animation-delay: -10s; }
+        @keyframes floatShape {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .container {
+            max-width: 100%; min-height: 100vh; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px 20px; position: relative; z-index: 1;
+        }
+        /* 音乐控制按钮 */
+        .music-control {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; font-size: 20px;
+        }
+        .music-control:hover {
+            background: rgba(255, 255, 255, 0.2); transform: scale(1.1);
+        }
+        .music-control.playing {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 107, 157, 0); }
+        }
+        .screen {
+            display: none; flex-direction: column; align-items: center;
+            text-align: center; width: 100%; max-width: 600px;
+            animation: fadeSlide 0.6s ease-out;
+        }
+        .screen.active { display: flex; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-badge {
+            display: inline-block; background: var(--gradient-1);
+            padding: 6px 20px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 500; letter-spacing: 2px; margin-bottom: 20px;
+        }
+        .main-title {
+            font-size: 3.5rem; font-weight: 900; letter-spacing: -2px;
+            margin-bottom: 10px; background: var(--gradient-1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sub-title { font-size: 1rem; color: var(--text-secondary); letter-spacing: 4px; }
+        .intro-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 30px; margin: 30px 0; width: 100%;
+        }
+        .intro-text { font-size: 0.95rem; line-height: 2; color: var(--text-secondary); }
+        .intro-highlight { color: var(--accent-pink); font-weight: 500; }
+        .type-preview {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            justify-content: center; margin-top: 25px;
+        }
+        .type-chip {
+            background: rgba(255, 255, 255, 0.08); padding: 5px 12px;
+            border-radius: 15px; font-size: 0.75rem; color: var(--text-secondary);
+        }
+        .start-btn {
+            background: var(--gradient-1); border: none; color: white;
+            padding: 18px 60px; font-size: 1.1rem; font-weight: 700;
+            font-family: inherit; letter-spacing: 2px; border-radius: 50px;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.3);
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(255, 107, 157, 0.4);
+        }
+        .progress-section { width: 100%; margin-bottom: 40px; }
+        .progress-top {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 12px;
+        }
+        .progress-label { font-size: 0.85rem; color: var(--accent-pink); font-weight: 500; }
+        .progress-count { font-size: 0.85rem; color: var(--text-secondary); }
+        .progress-track {
+            width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gradient-1); border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+        .question-section { width: 100%; text-align: left; }
+        .question-title {
+            font-size: 1.3rem; font-weight: 600; line-height: 1.7;
+            margin-bottom: 20px; color: rgba(255, 255, 255, 0.95);
+        }
+        .question-context {
+            font-size: 0.85rem; color: var(--accent-purple); margin-bottom: 12px;
+            font-style: italic; opacity: 0.8;
+        }
+        .options-grid {
+            display: flex; flex-direction: column; gap: 14px; width: 100%;
+        }
+        .option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; padding: 18px 22px; cursor: pointer;
+            transition: all 0.3s ease; display: flex;
+            align-items: flex-start; gap: 15px; text-align: left;
+        }
+        .option-card:hover {
+            background: rgba(255, 107, 157, 0.1);
+            border-color: var(--accent-pink); transform: translateX(8px);
+        }
+        .option-card:active { transform: scale(0.98); }
+        .option-icon { font-size: 1.4rem; min-width: 35px; text-align: center; margin-top: 2px; }
+        .option-text { font-size: 0.95rem; line-height: 1.7; color: rgba(255, 255, 255, 0.85); }
+        .loading-content { padding: 60px 0; }
+        .loading-icon { font-size: 4rem; margin-bottom: 25px; animation: bounce 1s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .loading-text { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 15px; }
+        .loading-sub { font-size: 0.85rem; color: rgba(255, 255, 255, 0.4); }
+        .loading-dots { display: flex; gap: 8px; margin-top: 20px; }
+        .loading-dots span {
+            width: 8px; height: 8px; border-radius: 50%;
+            animation: loadingDot 1.4s infinite ease-in-out;
+        }
+        .loading-dots span:nth-child(1) { background: var(--accent-pink); animation-delay: 0s; }
+        .loading-dots span:nth-child(2) { background: var(--accent-purple); animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { background: var(--accent-blue); animation-delay: 0.4s; }
+        @keyframes loadingDot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; padding: 35px 30px; width: 100%; max-width: 520px;
+        }
+        .result-badge {
+            display: inline-block; background: var(--gradient-1); padding: 5px 15px;
+            border-radius: 15px; font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 1px; margin-bottom: 15px;
+        }
+        .result-rarity {
+            font-size: 0.75rem; color: var(--accent-yellow); margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .result-type {
+            font-size: 3.5rem; font-weight: 900; letter-spacing: -2px;
+            background: var(--gradient-1); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px;
+        }
+        .result-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 5px; }
+        .char-showcase {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 25px 0; border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 25px;
+        }
+        .char-art {
+            font-size: 5rem; margin-bottom: 15px;
+            filter: drop-shadow(0 0 20px rgba(255, 107, 157, 0.5));
+            animation: floatChar 3s ease-in-out infinite;
+        }
+        @keyframes floatChar {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .char-title { font-size: 1.1rem; font-weight: 500; margin-bottom: 5px; color: var(--accent-pink); }
+        .char-source { font-size: 0.8rem; color: var(--text-secondary); }
+        .char-desc {
+            text-align: left; font-size: 0.95rem; line-height: 2;
+            color: rgba(255, 255, 255, 0.8); margin: 25px 0;
+        }
+        .traits-wrap { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        .trait-tag {
+            background: rgba(255, 107, 157, 0.15); color: var(--accent-pink);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem;
+            border: 1px solid rgba(255, 107, 157, 0.3);
+        }
+        .dimension-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .dim-card {
+            background: rgba(255, 255, 255, 0.03); border-radius: 12px;
+            padding: 15px; text-align: left;
+        }
+        .dim-label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .dim-value { font-size: 0.9rem; font-weight: 600; color: var(--accent-blue); }
+        .action-row { display: flex; gap: 12px; justify-content: center; margin-top: 30px; }
+        .action-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15); color: white;
+            padding: 12px 25px; font-family: inherit; font-size: 0.9rem;
+            font-weight: 500; border-radius: 25px; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-2px); }
+        .action-btn.primary { background: var(--gradient-1); border: none; }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            z-index: 100; justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 35px; max-width: 400px; width: 90%; text-align: center;
+        }
+        .modal-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; }
+        .share-box {
+            background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px;
+            font-size: 0.9rem; line-height: 1.8; text-align: left;
+            white-space: pre-wrap; margin: 20px 0;
+        }
+        .modal-close {
+            background: var(--gradient-1); border: none; color: white;
+            padding: 12px 40px; font-family: inherit; font-size: 0.95rem;
+            font-weight: 500; border-radius: 25px; cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .main-title { font-size: 2.5rem; }
+            .question-title { font-size: 1.15rem; }
+            .result-type { font-size: 2.8rem; }
+            .dimension-grid { grid-template-columns: 1fr; }
+        }
+        .nav-row {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; margin-top: 30px;
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6); padding: 10px 20px;
+            font-family: inherit; font-size: 0.85rem; border-radius: 20px;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        .back-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .back-btn:disabled:hover { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.6); }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/audio/2022/10/18/audio_53d9d6e4a9.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" type="audio/mpeg">
+    </audio>
+    <button class="music-control" id="musicBtn" title="播放背景音乐">🎵</button>
+    
+    <div class="bg-animation">
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+    </div>
+    <div class="container">
+        <!-- 首页 -->
+        <div class="screen active" id="landing">
+            <div class="logo-badge">💕 SBTI 恋爱版</div>
+            <h1 class="main-title">恋 恋 SBTI</h1>
+            <p class="sub-title">你的爱情人格是什么</p>
+            <div class="intro-box">
+                <p class="intro-text">
+                    这不是普通的恋爱测试 😏<br><br>
+                    <span class="intro-highlight">16种爱情人格</span>，每一种都是对爱情的不同理解。<br><br>
+                    测完你会知道：你在感情里是什么角色，你会吸引什么样的人，以及为什么你总是... <span class="intro-highlight">（此处留给你自己揭晓）</span>
+                </p>
+                <div class="type-preview">
+                    <span class="type-chip">💔 恋爱脑er</span>
+                    <span class="type-chip">🧊 冰山美人er</span>
+                    <span class="type-chip">👑 海王er</span>
+                    <span class="type-chip">🎭 演技派</span>
+                    <span class="type-chip">🐢 慢热er</span>
+                    <span class="type-chip">⚡ 直球er</span>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startTest()">开始测试 →</button>
+        </div>
+
+        <!-- 问题页 -->
+        <div class="screen" id="question">
+            <div class="progress-section">
+                <div class="progress-top">
+                    <span class="progress-label">💫 第 <span id="qNum">一</span> 题</span>
+                    <span class="progress-count"><span id="qNow">1</span> / 12</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progFill"></div>
+                </div>
+            </div>
+            <div class="question-section">
+                <p class="question-context" id="qContext"></p>
+                <h2 class="question-title" id="qText"></h2>
+                <div class="options-grid" id="optGrid"></div>
+            </div>
+            <div class="nav-row">
+                <button class="back-btn" id="backBtn" onclick="prevQuestion()" disabled>← 返回上一题</button>
+            </div>
+        </div>
+
+        <!-- Loading页 -->
+        <div class="screen" id="loading">
+            <div class="loading-content">
+                <div class="loading-icon">🫣</div>
+                <p class="loading-text">正在分析你的恋爱密码...</p>
+                <div class="loading-dots"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+
+        <!-- 结果页 -->
+        <div class="screen" id="result">
+            <div class="result-card">
+                <div class="result-badge">你的爱情人格</div>
+                <div class="result-rarity" id="resRarity">✨ 全球仅 8.2% 的人</div>
+                <div class="result-type" id="resType">LV-01</div>
+                <div class="result-name" id="resName">恋爱脑 er</div>
+                <div class="char-showcase">
+                    <div class="char-art" id="charArt">🫠</div>
+                    <div class="char-title" id="charTitle">纯爱战神</div>
+                    <div class="char-source" id="charSource">虚构人物 · 仅供参考</div>
+                </div>
+                <p class="char-desc" id="charDesc"></p>
+                <div class="traits-wrap" id="traitWrap"></div>
+                <div class="dimension-grid" id="dimGrid"></div>
+                <div class="action-row">
+                    <button class="action-btn" onclick="retake()">重新测试</button>
+                    <button class="action-btn primary" onclick="shareRes()">分享结果</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分享弹窗 -->
+    <div class="modal-overlay" id="shareModal">
+        <div class="modal-box">
+            <div class="modal-title">🎭 分享你的恋爱人格</div>
+            <div class="share-box" id="shareBox"></div>
+            <button class="modal-close" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        // 背景音乐控制
+        const bgMusic = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+        let isPlaying = false;
+
+        musicBtn.addEventListener('click', function() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.remove('playing');
+            } else {
+                bgMusic.play().catch(() => {
+                    // 自动播放被阻止时静默处理
+                });
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.add('playing');
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // 16种爱情人格（SBTI风格旧名称）
+        const loveTypes = {
+            'LV01': {
+                name: '恋爱脑 er', title: '纯爱战神', art: '🫠',
+                desc: '恭喜你，恋爱在你人生中排第一。不是夸张，是真的。你的喜怒哀乐和恋爱状态高度绑定，对方发消息你秒回，对方已读不回你血压飙升。你不是恋爱脑，谁是？但别担心，纯粹的爱是这个时代最稀缺的东西。',
+                traits: ['极度专一', '情绪随爱波动', '为爱可以', '掏心掏肺'],
+                dims: ['感性指数 98%', '上头速度 0.5秒'],
+                rarity: '6.8%'
+            },
+            'LV02': {
+                name: '海王 er', title: '八爪鱼型选手', art: '🐙',
+                desc: '你的心就像海洋，宽广而博爱。不是渣，是魅力太大挡不住。你可以同时 handle 多条感情线，且每一条都真诚（至少你是这么觉得的）。你的问题是：选择困难症晚期，以及永远不知道自己想要什么。',
+                traits: ['魅力四射', '选择困难', '暧昧高手', '真诚（大概）'],
+                dims: ['社交指数 95%', '专一度 15%'],
+                rarity: '4.2%'
+            },
+            'LV03': {
+                name: '冰山美人 er', title: '高冷天花板', art: '🧊',
+                desc: '追你的人排到法国，但你眼都不抬一下。不是你高冷，是懂你的人太少。你把真心藏得很深，只有足够真诚的人才能融化你。如果有人能走进你的心里，那他一定是上辈子拯救了银河系。',
+                traits: ['高冷外表', '火热内心', '宁缺毋滥', '一旦认定很深情'],
+                dims: ['防御指数 92%', '深情指数 99%'],
+                rarity: '5.5%'
+            },
+            'LV04': {
+                name: '直球 er', title: '不绕弯子战士', art: '⚡',
+                desc: '喜欢就表白，不喜欢就拒绝，你的人生没有那么多弯弯绕绕。暗恋？不存在的。你宁可被拒绝也不愿错过，这让你在感情中少走了很多弯路，但有时候也容易吓到对方（谁让你太勇了）。',
+                traits: ['干脆利落', '不喜欢试探', '真诚直接', '敢爱敢恨'],
+                dims: ['勇气指数 97%', '浪漫指数 85%'],
+                rarity: '8.1%'
+            },
+            'LV05': {
+                name: '演技派', title: '奥斯卡欠你小金人', art: '🎭',
+                desc: '你的恋爱状态分三层：第一层是路人甲，第二层是普通朋友，第三层...只有你自己知道。追你的人觉得你忽冷忽热，其实你只是在保护自己。你嘴上说的和心里想的可能完全相反，别问，问就是「没事」。',
+                traits: ['忽冷忽热', '口是心非', '自我保护强', '需要安全感'],
+                dims: ['演技指数 96%', '真心指数 88%'],
+                rarity: '7.3%'
+            },
+            'LV06': {
+                name: '慢热 er', title: '后知后觉选手', art: '🐢',
+                desc: '别人都结婚了，你还在想「他是不是喜欢我」。你的感情需要慢慢升温，一旦热起来就是一辈子。但问题是，很多人等不到你「想明白」就跑了。建议：适当加快一下速度，世界不会等你。',
+                traits: ['后知后觉', '需要时间', '一旦爱上很持久', '日久生情型'],
+                dims: ['升温时间 3-6个月', '专一指数 99%'],
+                rarity: '9.8%'
+            },
+            'LV07': {
+                name: '独立人格 er', title: '爱情只是调味剂', art: '🏔️',
+                desc: '有对象很好，没对象也挺好。你的生活丰富多彩，恋爱只是其中一部分。你不会因为任何人放弃自己的原则和计划，这让你很有魅力，但也让一些粘人型选手望而却步。',
+                traits: ['极度独立', '边界感强', '事业心重', '理性冷静'],
+                dims: ['独立指数 98%', '粘人指数 12%'],
+                rarity: '11.2%'
+            },
+            'LV08': {
+                name: '粘人精 er', title: '人形挂件本体', art: '🧸',
+                desc: '你的理想恋爱是：24小时贴贴，恨不得住在一起。不是你缺乏安全感，是你太喜欢对方了。但要注意哦，过度的依赖可能会让对方窒息。试着给自己也给对方一些空间，爱情才能更长久。',
+                traits: ['极度依赖', '需要陪伴', '占有欲强', '情感充沛'],
+                dims: ['粘人指数 98%', '自由指数 8%'],
+                rarity: '6.5%'
+            },
+            'LV09': {
+                name: '嘴硬心软 er', title: '口是心非代言人', art: '💢',
+                desc: '吵架永远不认输，但吵完就后悔。你嘴上说的「分手」，心里想的是「你哄我啊」。你的刀子嘴豆腐心让伴侣又爱又恨，典型的不见棺材不掉泪，见了棺材哭最惨。',
+                traits: ['嘴硬心软', '傲娇本娇', '吵架后秒后悔', '需要台阶'],
+                dims: ['嘴硬指数 95%', '心软指数 99%'],
+                rarity: '8.7%'
+            },
+            'LV10': {
+                name: '智性恋 er', title: '脑子比脸重要', art: '🧠',
+                desc: '你可以接受颜值不高，但不能接受智商不够。你喜欢聪明、有思想、有见地的人。和智商高的人聊天是一种享受，和智商低的人聊天是折磨。你的灵魂伴侣必须有脑子。',
+                traits: ['智性恋', '追求精神契合', '聊得来最重要', '颜值可以低但脑子必须高'],
+                dims: ['智商要求 95%', '颜值要求 40%'],
+                rarity: '7.1%'
+            },
+            'LV11': {
+                name: '细节控 er', title: '魔鬼藏在细节里', art: '🔍',
+                desc: '你记性超好，尤其是对那些容易被忽略的小事。对方随口一句话你都记得，但对方可能早就忘了。你的爱情在细节里，崩塌也在细节里。记住：不要用你的标准去要求所有人。',
+                traits: ['记性好', '注重仪式感', '敏感细腻', '观察力极强'],
+                dims: ['细节指数 99%', '包容指数 45%'],
+                rarity: '8.9%'
+            },
+            'LV12': {
+                name: '回避型 er', title: '习惯性逃跑选手', art: '🏃',
+                desc: '每次感觉对方要靠近，你就想逃。不是你不爱，是太怕受伤了。你习惯用距离保护自己，但这种方式往往把真正爱你的人推开。试着勇敢一点，真爱值得冒险。',
+                traits: ['习惯回避', '害怕亲密', '自我保护', '渴望被爱但害怕'],
+                dims: ['回避指数 92%', '渴望指数 88%'],
+                rarity: '5.3%'
+            },
+            'LV13': {
+                name: '付出型 er', title: 'ATM充电宝', art: '💳',
+                desc: '你对另一半的付出是不求回报的那种（好吧，可能还是有点求回报）。你总觉得付出够多，对方就会更爱你。但真相是：爱情不是交易，你的付出要有底线。',
+                traits: ['无私奉献', '讨好型人格', '边界模糊', '需要学会说不'],
+                dims: ['付出指数 99%', '索取指数 15%'],
+                rarity: '6.1%'
+            },
+            'LV14': {
+                name: '洒脱er', title: '爱咋咋地选手', art: '😌',
+                desc: '你很少在感情中患得患失，因为你知道：是你的就是你的，不是你的强求也没用。这种松弛感让你很有魅力，但有时候也会让人觉得你对感情不够认真。抓大放小，你深谙此道。',
+                traits: ['心态超好', '松弛感', '不强求', '独立自主'],
+                dims: ['洒脱指数 98%', '焦虑指数 8%'],
+                rarity: '9.4%'
+            },
+            'LV15': {
+                name: '理想主义 er', title: '灵魂伴侣追求者', art: '✨',
+                desc: '你要的不是凑合，是那个「对的人」。你的心里有一个完美的理想型画像，遇到不匹配的你就想划走。但现实是：完美的人不存在，完美的契合需要磨合。别等了，去爱吧。',
+                traits: ['追求完美', '理想主义', '灵魂伴侣党', '不易妥协'],
+                dims: ['理想指数 97%', '务实指数 25%'],
+                rarity: '7.8%'
+            },
+            'LV16': {
+                name: '搞怪er', title: '恋爱娱乐化选手', art: '🤪',
+                desc: '你谈恋爱的方式就是：搞怪、整蛊、整活。你的恋爱永远充满笑声，即使吵架也能吵出喜剧效果。你用幽默化解一切尴尬和矛盾，这是你的天赋。但有时候，认真的时刻也需要认真对待。',
+                traits: ['幽默感爆棚', '整活能力强', '化解尴尬高手', '快乐源泉'],
+                dims: ['搞笑指数 99%', '深情指数 75%'],
+                rarity: '8.5%'
+            }
+        };
+
+        // 测试问题（12道，有趣味性、长选项）
+        const questions = [
+            {
+                context: '「夜深忽梦少年事」',
+                q: '凌晨两点，你躺在被窝里翻来覆去睡不着，这时候手机突然亮了——是你曾经很喜欢的那个人发来一条消息："睡了吗？我好像梦到你了。" 你会？',
+                opts: [
+                    { text: '心跳骤然加速，立刻坐起来反复看这句话的含义，然后开始回想起过去的点点滴滴，整个人都清醒了再也睡不着，脑子里已经把复合后的场景演了一遍', icon: '💓', scores: {LV:2, AN:1, XI:1} },
+                    { text: '假装没看到，把手机扣过去，假装自己已经睡了。但其实内心已经翻江倒海，在被窝里偷偷笑，然后又偷偷哭', icon: '😶', scores: {GB:2, HB:1} },
+                    { text: '直接回复："做梦梦到我？那你是想我了还是在骂我？"——毕竟深夜消息，不一定是惊喜也可能是惊吓，先试探一下再说', icon: '🤔', scores: {ZQ:2, XN:1} },
+                    { text: '截图发给闺蜜群，三个人一起分析到凌晨四点，非要搞清楚对方到底是什么意思，附带讨论如果复合了要怎么办', icon: '👯', scores: {JJ:1, XX:1} }
+                ]
+            },
+            {
+                context: '「人间烟火气，最抚凡人心」',
+                q: '周末到了，你理想中和喜欢的人一起度过的方式是？',
+                opts: [
+                    { text: '一起去逛菜市场，然后回家研究怎么把那些食材变成一桌好吃的。吃饭的时候聊天、追剧、或者就安静地待着，这样就很好', icon: '🛒', scores: {NK:2, LV:1} },
+                    { text: '去听一场live house或者看一场展，然后找个咖啡店坐下来聊聊刚才的感受，觉得精神上的共鸣比什么都重要', icon: '🎵', scores: {ZX:2, AN:1} },
+                    { text: '宅在家里一起打游戏、点外卖、躺在床上刷手机，有时候什么都不做，只是待在一起就觉得很安心', icon: '🎮', scores: {DL:2, GB:1} },
+                    { text: '计划一次说走就走的短途旅行，去海边看日落或者去山里看星星，生活需要仪式感，恋爱更需要惊喜', icon: '✈️', scores: {GJ:2, ZQ:1} }
+                ]
+            },
+            {
+                context: '「情不知所起，一往而深」',
+                q: '你相信自己会是哪种一见钟情的类型？',
+                opts: [
+                    { text: '相信！人群中多看了一眼，整个人生都亮了。喜欢就是喜欢，不需要理由，不需要铺垫，心动就是一瞬间的事', icon: '⚡', scores: {LV:2, ZQ:1} },
+                    { text: '不相信，我觉得日久生情才是靠谱的。那些所谓的一见钟情不过是见色起意，真正的感情需要时间来验证', icon: '🧊', scores: {GB:2, XX:1} },
+                    { text: '我更相信那种说不清的缘分，有时候你以为自己不会心动，但遇到对的人，一切都刚刚好', icon: '🎲', scores: {ST:2, AN:1} },
+                    { text: '一见钟情只是开始，能不能走下去还得看后续。喜欢是本能，相处才是能力', icon: '🧠', scores: {ZX:2, DL:1} }
+                ]
+            },
+            {
+                context: '「山有木兮木有枝，心悦君兮君不知」',
+                q: '你暗恋一个人的时候，最典型的小动作是什么？',
+                opts: [
+                    { text: '翻看对方的朋友圈和微博，从头看到尾，把每一条动态都研究一遍，恨不得能从字里行间读出什么隐藏含义', icon: '📱', scores: {XX:2, AN:1} },
+                    { text: '在人群中总是下意识地寻找对方的身影，听到对方名字会竖起耳朵，但表面上装作若无其事，假装自己根本不在乎', icon: '👀', scores: {GB:2, HB:1} },
+                    { text: '频繁地"偶遇"对方，去对方常去的咖啡店、图书馆，就为了多看几眼。这种小心思只有自己知道，但其实大家都知道', icon: '☕', scores: {LV:2, FC:1} },
+                    { text: '默默地对对方好，但不让任何人看出来。把喜欢藏在心底，哪怕对方永远不知道也没关系，爱过就不后悔', icon: '🌙', scores: {FC:2, GB:1} }
+                ]
+            },
+            {
+                context: '「若教眼底无离恨，不信人间有白头」',
+                q: '你身边有一个从学生时代就在一起、陪伴了你很多年的恋人，现在异地恋中，对方工作很忙联系越来越少，你会怎么做？',
+                opts: [
+                    { text: '主动表达自己的不安，告诉他你需要更多的联系和关心。爱情需要沟通，憋着不说只会越来越难受', icon: '💬', scores: {LV:2, FC:1} },
+                    { text: '理解对方的工作压力，默默做好自己的事情，等待一个合适的时机再好好谈谈。给彼此一些空间和信任', icon: '🤝', scores: {GB:2, ST:1} },
+                    { text: '开始怀疑这段感情是否还有必要坚持下去，如果连基本的陪伴都给不了，那恋爱的意义是什么', icon: '❓', scores: {AN:2, HB:1} },
+                    { text: '虽然很想念，但不想做一个无理取闹的人。自己去逛逛街、和朋友吃吃饭，把生活安排得充实一点', icon: '🌸', scores: {ST:2, XX:1} }
+                ]
+            },
+            {
+                context: '「人生若只如初见」',
+                q: '你最喜欢恋爱的哪个阶段？',
+                opts: [
+                    { text: '暧昧期！那种心跳加速、患得患失、每天都在猜对方心思的感觉，简直让人欲罢不能，比正式在一起了还有意思', icon: '🎭', scores: {LV:2, AN:1} },
+                    { text: '热恋期！恨不得24小时贴在一起，做什么都想带上对方，觉得对方天下第一好，世界都变得美好了', icon: '🔥', scores: {NK:2, LV:1} },
+                    { text: '老夫老妻期！经历了热恋的激情之后还能相濡以沫，那种默契和安心感才是最难得的', icon: '🏡', scores: {ST:2, GB:1} },
+                    { text: '没有最喜欢的阶段，每个阶段都有每个阶段的美好。重要的是和谁一起经历，和对的人在一起每天都是好日子', icon: '☯️', scores: {DL:2, GJ:1} }
+                ]
+            },
+            {
+                context: '「你站在桥上看风景」',
+                q: '你照镜子的时候，觉得自己是什么样的人？',
+                opts: [
+                    { text: '一个很会照顾别人的人，朋友有事第一个想到我。但有时候也会累，想让别人照顾一下自己', icon: '🤗', scores: {FC:2, LV:1} },
+                    { text: '一个很独立的人，不需要别人也能过得很好。偶尔会觉得有点孤单，但这才是酷酷的人生', icon: '🦊', scores: {DL:2, GB:1} },
+                    { text: '一个外表冷冷的但内心很柔软的人，熟悉我的人都知道我其实很感性，只是不太会表达', icon: '🪨', scores: {HB:2, GB:1} },
+                    { text: '一个一直在等待的人，等那个对的人出现。在那之前，我选择好好爱自己', icon: '🌟', scores: {ZX:2, AN:1} }
+                ]
+            },
+            {
+                context: '「两情若是久长时，又岂在朝朝暮暮」',
+                q: '你觉得自己在感情中最需要的是什么？',
+                opts: [
+                    { text: '安全感。我需要一个能让我完全信任、可以放下所有防备的人，不用担心被抛弃或者被背叛', icon: '🛡️', scores: {XX:2, LV:1} },
+                    { text: '新鲜感。我需要源源不断的惊喜和心动，如果生活变得太无聊，我可能会忍不住去外面寻找刺激', icon: '🎢', scores: {HB:2, GJ:1} },
+                    { text: '理解。懂比爱更重要，我希望有人能理解我的想法、我的追求、我的小情绪，而不是只关心表面的东西', icon: '💭', scores: {ZX:2, XX:1} },
+                    { text: '自由。我需要一定的个人空间，不喜欢被束缚、被控制、被查岗。健康的恋爱应该是两个独立的人互相陪伴', icon: '🪶', scores: {GB:2, ST:1} }
+                ]
+            },
+            {
+                context: '「愿得一心人，白首不相离」',
+                q: '如果你的好朋友告诉你，他/她好像喜欢上同性的同事了，你会怎么回应？',
+                opts: [
+                    { text: '这不是理所当然的吗？喜欢就是喜欢，和性别有什么关系。支持你朋友的勇敢，希望他/她幸福', icon: '🏳️‍🌈', scores: {ST:2, DL:1} },
+                    { text: '先确认朋友是不是真的想清楚了，不管是什么性向的感情，重要的是双方真心相爱', icon: '💕', scores: {XX:2, LV:1} },
+                    { text: '（若有所思）其实你自己也...（小声）从来没认真想过这个问题，直到现在才发现，原来我也是可以喜欢异性的', icon: '🤷', scores: {AN:2, GB:1} },
+                    { text: '八卦地追问细节！喜欢的人是谁？怎么发现的？要不要我帮你出主意？朋友的事就是我的事', icon: '👂', scores: {GJ:2, XX:1} }
+                ]
+            },
+            {
+                context: '「等闲变却故人心，却道故人心易变」',
+                q: '你约会时对方迟到了半小时，你会？',
+                opts: [
+                    { text: '表面平静，内心已经演完一部剧：从"他是不是不喜欢我了"演到"他是不是出车祸了"再演到"我是不是太敏感了"', icon: '🎬', scores: {AN:2, XX:1} },
+                    { text: '无所谓，反正我也在刷手机等他。迟到就迟到呗，我自己玩得也挺开心的', icon: '😌', scores: {ST:2, GB:1} },
+                    { text: '直接问：怎么迟到了？是不是有什么事？直接沟通比胡思乱想要高效得多', icon: '⚡', scores: {ZQ:2, LV:1} },
+                    { text: '假装没迟到，帮他找借口：堵车很正常嘛没关系没关系——但其实已经在心里扣分了', icon: '🥺', scores: {HB:2, XX:1} }
+                ]
+            },
+            {
+                context: '「执子之手，与子偕老」',
+                q: '用一句诗或歌词形容你的爱情观',
+                opts: [
+                    { text: '"从前的日色变得慢，车、马、邮件都慢，一生只够爱一个人。" ——我向往那种一生一世一双人的爱情', icon: '🐢', scores: {XX:2, ST:1} },
+                    { text: '"愿你历尽千帆，归来仍是少年。" ——我希望我们的爱情能保持最初的心动，不管在一起多久，依然像第一天那样', icon: '🌸', scores: {ZQ:2, LV:1} },
+                    { text: '"我们相爱一生，还是太短。" ——我觉得好的爱情就是这样，让人想要一直爱下去，永远不分开', icon: '💫', scores: {LV:2, NK:1} },
+                    { text: '"你记得也好，最好你忘掉。" ——有些人注定是过客，爱过就够了，不必强求结果，学会放下也是一种能力', icon: '🍃', scores: {GB:2, ST:1} }
+                ]
+            },
+            {
+                context: '「曾经沧海难为水」',
+                q: '你手机相册里最多的照片是什么类型的？',
+                opts: [
+                    { text: '自拍和他/她的合照，每一张都要精修然后发朋友圈，恨不得全世界都知道我们很幸福', icon: '📸', scores: {LV:2, NK:1} },
+                    { text: '风景、美食、猫咪，反正不是人。拍人的照片少得可怜，自己出镜更是几乎没有', icon: '🐱', scores: {DL:2, GB:1} },
+                    { text: '聊天记录截图、表情包合集，还有一些只有自己能看懂的"证据"——这些都是珍贵的回忆', icon: '📁', scores: {XX:2, AN:1} },
+                    { text: '各种表情包和搞笑图片，我手机里存的全是沙雕内容，恋爱？不存在的，只有快乐', icon: '🤪', scores: {GJ:2, HB:1} }
+                ]
+            }
+        ];
+
+        // 测试逻辑
+        let curQ = 0;
+        let scores = {LV:0, HB:0, GB:0, ZQ:0, AN:0, XX:0, NK:0, ST:0, GJ:0, FC:0, DL:0, ZX:0, XI:0, XN:0, ZZ:0};
+        const chineseNum = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+        let answerHistory = [];
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startTest() {
+            curQ = 0;
+            scores = {LV:0, HB:0, GB:0, ZQ:0, AN:0, XX:0, NK:0, ST:0, GJ:0, FC:0, DL:0, ZX:0, XI:0, XN:0, ZZ:0};
+            answerHistory = [];
+            showScreen('question');
+            renderQ();
+        }
+
+        function renderQ() {
+            const q = questions[curQ];
+            document.getElementById('qNow').textContent = curQ + 1;
+            document.getElementById('qNum').textContent = chineseNum[curQ];
+            document.getElementById('progFill').style.width = ((curQ + 1) / questions.length * 100) + '%';
+            document.getElementById('qText').textContent = q.q;
+            document.getElementById('qContext').textContent = q.context;
+            document.getElementById('backBtn').disabled = answerHistory.length === 0;
+
+            const optGrid = document.getElementById('optGrid');
+            optGrid.innerHTML = '';
+            q.opts.forEach(opt => {
+                const card = document.createElement('button');
+                card.className = 'option-card';
+                card.innerHTML = `<span class="option-icon">${opt.icon}</span><span class="option-text">${opt.text}</span>`;
+                card.onclick = () => selectOpt(opt);
+                optGrid.appendChild(card);
+            });
+        }
+
+        function selectOpt(opt) {
+            answerHistory.push({ questionIndex: curQ, selectedOption: opt, scoresSnapshot: {...scores} });
+            for (let k in opt.scores) scores[k] += opt.scores[k];
+            curQ++;
+            if (curQ < questions.length) {
+                renderQ();
+            } else {
+                showLoading();
+            }
+        }
+
+        function prevQuestion() {
+            if (answerHistory.length === 0) return;
+            const lastAnswer = answerHistory.pop();
+            scores = lastAnswer.scoresSnapshot;
+            curQ = lastAnswer.questionIndex;
+            renderQ();
+        }
+
+        function showLoading() {
+            showScreen('loading');
+            setTimeout(() => showResult(), 2800);
+        }
+
+        function calcType() {
+            const scoreList = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const top1 = scoreList[0][0];
+            const typeMap = {
+                'LV': ['LV01', 'LV08', 'LV13'],
+                'HB': ['LV04', 'LV09', 'LV16'],
+                'GB': ['LV03', 'LV07', 'LV14'],
+                'ZQ': ['LV04', 'LV10', 'LV16'],
+                'AN': ['LV05', 'LV11', 'LV15'],
+                'XX': ['LV01', 'LV06', 'LV12'],
+                'NK': ['LV08', 'LV13', 'LV06'],
+                'ST': ['LV14', 'LV16', 'LV07'],
+                'GJ': ['LV16', 'LV04', 'LV14'],
+                'FC': ['LV13', 'LV09', 'LV03'],
+                'DL': ['LV07', 'LV10', 'LV14'],
+                'ZX': ['LV10', 'LV15', 'LV03'],
+                'XI': ['LV01', 'LV05', 'LV11'],
+                'XN': ['LV04', 'LV06', 'LV14'],
+                'ZZ': ['LV10', 'LV07', 'LV11']
+            };
+            const possibleTypes = typeMap[top1] || ['LV01'];
+            const totalScore = scoreList.reduce((sum, item) => sum + item[1], 0);
+            const topScore = scoreList[0][1];
+            const ratio = topScore / (totalScore || 1);
+            let typeIndex = ratio > 0.35 ? 0 : ratio > 0.25 ? 1 : 2;
+            return possibleTypes[typeIndex % possibleTypes.length];
+        }
+
+        function showResult() {
+            showScreen('result');
+            const type = calcType();
+            const p = loveTypes[type];
+            document.getElementById('resType').textContent = type;
+            document.getElementById('resName').textContent = p.name;
+            document.getElementById('charTitle').textContent = p.title;
+            document.getElementById('resRarity').textContent = '✨ 全球仅 ' + p.rarity + ' 的人';
+            document.getElementById('charArt').textContent = p.art;
+            document.getElementById('charDesc').textContent = p.desc;
+
+            const traitWrap = document.getElementById('traitWrap');
+            traitWrap.innerHTML = '';
+            p.traits.forEach(t => {
+                const tag = document.createElement('span');
+                tag.className = 'trait-tag';
+                tag.textContent = t;
+                traitWrap.appendChild(tag);
+            });
+
+            const dimGrid = document.getElementById('dimGrid');
+            dimGrid.innerHTML = '';
+            p.dims.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'dim-card';
+                card.innerHTML = `<div class="dim-label">行为特征</div><div class="dim-value">${d}</div>`;
+                dimGrid.appendChild(card);
+            });
+        }
+
+        function retake() { startTest(); }
+
+        function shareRes() {
+            const type = document.getElementById('resType').textContent;
+            const name = document.getElementById('resName').textContent;
+            const title = document.getElementById('charTitle').textContent;
+            const rarity = document.getElementById('resRarity').textContent;
+            const shareText = `💕 我的恋爱人格是【${type} · ${name}】
+
+${title} ${rarity}
+
+${name}是什么体验？反正只有同款才懂 😏
+
+你也来测测你的恋爱人格吧！
+恋恋SBTI`;
+            document.getElementById('shareBox').textContent = shareText;
+            document.getElementById('shareModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
